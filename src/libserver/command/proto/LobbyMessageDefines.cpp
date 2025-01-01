@@ -450,6 +450,7 @@ void LobbyCommandCreateNicknameOK::Read(
 {
   buffer.Read(command.nickname);
   ReadCharacter(buffer, command.character);
+  buffer.Read(command.unk0);
 }
 
 void LobbyCommandCreateNicknameCancel::Write(

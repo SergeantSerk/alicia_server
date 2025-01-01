@@ -289,6 +289,7 @@ struct LobbyCommandCreateNicknameOK
 {
   std::string nickname{};
   Character character{};
+  uint32_t unk0 {};
 
   //! Writes the command to a provided sink buffer.
   //! @param command Command.

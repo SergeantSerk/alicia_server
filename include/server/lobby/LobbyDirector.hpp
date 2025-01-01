@@ -18,7 +18,7 @@ class LobbyDirector
 {
 public:
   //!
-  explicit LobbyDirector(
+  LobbyDirector(
     DataDirector& dataDirector,
     Settings::LobbySettings settings = {});
 
@@ -27,6 +27,21 @@ private:
   void HandleUserLogin(
     ClientId clientId,
     const LobbyCommandLogin& login);
+
+  //!
+  void HandleCreateNicknameOK(
+    ClientId clientId,
+    const LobbyCommandCreateNicknameOK& createNickname);
+
+  //!
+  void HandleEnterChannel(
+    ClientId clientId,
+    const LobbyCommandEnterChannel& enterChannel);
+
+  //!
+  void HandleMakeRoom(
+    ClientId clientId,
+    const LobbyCommandMakeRoom& makeRoom);
 
   //!
   void HandleHeartbeat(
