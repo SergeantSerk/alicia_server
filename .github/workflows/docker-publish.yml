@@ -56,7 +56,7 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
         brew update
-        brew install gcc
+        brew install boost
 
     - name: Configure build
       run: |
