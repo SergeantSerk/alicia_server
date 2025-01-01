@@ -33,6 +33,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
 
     - name: Set up CMake
       uses: lukka/get-cmake@v3.31.3
