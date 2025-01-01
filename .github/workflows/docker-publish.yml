@@ -1,4 +1,4 @@
-name: Build and publish Docker image
+name: Publish
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -18,10 +18,67 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  # Configure release type [Release, Debug, RelWithDebInfo, MinSizeRel]
+  BUILD_TYPE: Release
 
 
 jobs:
-  build:
+  binary:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        arch: [amd64, arm64, armv7]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@v3.31.3
+
+    - name: Set up build tools
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends build-essential
+        sudo apt-get clean
+
+    - name: Set up build tools (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        choco install visualstudio2019buildtools --package-parameters \
+        '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet'
+
+    - name: Set up build tools (macOS)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: |
+        brew update
+        brew install gcc
+
+    - name: Configure build
+      run: |
+        cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch }} \
+              -DBUILD_TESTS=False . \
+              -B ./build
+
+    - name: Build
+      run: cmake --build ./build --parallel
+
+    - name: Install
+      run: cmake --install ./build --prefix .
+  
+    - name: Zip artifacts
+      run: zip -r ${{ matrix.os }}-${{ matrix.arch }}.zip ./dist
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-${{ matrix.arch }}-binary
+        path: ${{ matrix.os }}-${{ matrix.arch }}.zip
+
+  docker:
     strategy:
       fail-fast: false
       matrix:
